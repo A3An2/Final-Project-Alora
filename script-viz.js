@@ -83,7 +83,7 @@ d3.csv("src/dataset.csv").then(data => {
       const groupG = svg.append("g")
         .attr("transform", `translate(${translateX}, ${translateY})`);
   
-
+      // Big Circles Drawing
       groupG.append("circle")
         .attr("cx", root.x)
         .attr("cy", root.y)
@@ -99,14 +99,14 @@ d3.csv("src/dataset.csv").then(data => {
         const comp = leaf.data.comp;
         const fillColor = compColorMap[comp] || "#90908E";
         
-        groupG.append("circle")
-          .attr("cx", leaf.x)
-          .attr("cy", leaf.y)
-          .attr("r", desiredLeafR)
-          .attr("fill", fillColor)
-          .attr("fill-opacity",  1)
-          .attr("stroke", "#fff")
-          .attr("stroke-opacity", 0.3);
+      groupG.append("circle")
+        .attr("cx", leaf.x)
+        .attr("cy", leaf.y)
+        .attr("r", desiredLeafR)
+        .attr("fill", fillColor)
+        .attr("fill-opacity",  1)
+        .attr("stroke", "#fff")
+        .attr("stroke-opacity", 0.3);
       });
   
       groupG.append("text")
