@@ -41,7 +41,6 @@ d3.csv("src/dataset.csv").then(data => {
     groupsData.forEach((records, groupName) => {
         console.log("groupName:", groupName);
       
-        // 构造用于 pack 布局的数据：每个物种节点设置 value 为 100，这样理想下它的真实半径 sqrt(100)=10（但 pack 会对整个布局做缩放）
       const childrenData = records.map(d => ({
         name: d.SpeciesBinomial,
         value: 100,
@@ -50,28 +49,21 @@ d3.csv("src/dataset.csv").then(data => {
   
       const rootData = { children: childrenData };
   
-      // 建立层级数据
       const root = d3.hierarchy(rootData)
         .sum(d => d.value);
   
-      // 构造 d3.pack 布局,设置一个足够大的 size，目前设定为 [500, 500]
       const packLayout = d3.pack()
-        .padding(2) // 设置2px间隙，确保小圆之间不重叠
+        .padding(2)
         .size([400, 400]);
   
-      // 计算 pack 布局，此时每个叶节点的 r 值不一定等于理想的 10px，它们会按整个布局尺寸比例缩放。
       packLayout(root);
   
-      // 所有叶节点（每个叶节点代表一个小圆）
       const leaves = root.leaves();
-      if (leaves.length === 0) return; // 如果没有数据则跳过
+      if (leaves.length === 0) return;
   
-      // 由于所有叶节点原始计算出来的半径应都相等（因为 value 相同），取任意叶节点的 r 作为当前 pack 算出来的半径
       const computedLeafR = leaves[0].r;
-      // 计算一个缩放比例，使得每叶节点的半径变为我们希望的10px
       const scaleRatio = desiredLeafR / computedLeafR;
   
-      // 对整个层级重新缩放——即所有节点的位置和半径
       root.each(node => {
         node.x *= scaleRatio;
         node.y *= scaleRatio;
@@ -91,7 +83,7 @@ d3.csv("src/dataset.csv").then(data => {
       const groupG = svg.append("g")
         .attr("transform", `translate(${translateX}, ${translateY})`);
   
-      // 绘制“大圆”：大圆即包络所有小圆的外圆
+
       groupG.append("circle")
         .attr("cx", root.x)
         .attr("cy", root.y)
@@ -101,23 +93,22 @@ d3.csv("src/dataset.csv").then(data => {
         .attr("stroke", "#aaa")
         .attr("stroke-opacity", 0.3);
   
-      // 绘制每个小圆（叶节点）：小圆固定直径20px，颜色由 CompMech 决定（未匹配的保持默认黑色）
+      
       leaves.forEach(leaf => {
-        // 根据 comp 字段取色，若无则用黑色
+        // 根据 comp 字段取色
         const comp = leaf.data.comp;
         const fillColor = compColorMap[comp] || "#90908E";
         
         groupG.append("circle")
           .attr("cx", leaf.x)
           .attr("cy", leaf.y)
-          .attr("r", desiredLeafR)  // 固定为 10px
+          .attr("r", desiredLeafR)
           .attr("fill", fillColor)
           .attr("fill-opacity",  1)
           .attr("stroke", "#fff")
           .attr("stroke-opacity", 0.3);
       });
   
-      // 在大圆正中间添加文字，显示 SpeciesGrouped 名称
       groupG.append("text")
         .attr("x", root.x)
         .attr("y", root.y)
